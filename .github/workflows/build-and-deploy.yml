@@ -1,7 +1,8 @@
 name: "Deploy Terraform Infrastructure"
 
 on:
-  push: [main]
+  push: 
+    branches: [main]
 
 env:
   TerraformWorkingDirectory: "./src/infra"
