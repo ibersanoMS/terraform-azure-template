@@ -2,12 +2,19 @@ name: "Deploy Terraform Infrastructure"
 
 on:
   push: [main]
+
 env:
-  TerraformWorkingDirectory: < Working Directory >
-  StorageAccountName: "< Storage Account Name >"
-  StateStoreContainerName: "< Blob Container Name >"
-  StateStoreFilename: "< State Filename >"
+  TerraformWorkingDirectory: "./src/infra"
+  StateStoreRGName: ${{ secrets.STATE_STORE_RGNAME }}
+  StorageAccountName: ${{ secrets.STORAGE_ACCOUNT_NAME }}
+  StateStoreContainerName: ${{ secrets.STATE_STORAGE_CONTAINER_NAME }}
+  StateStoreFilename: ${{ secrets.STATE_STORE_FILENAME }}
   DestroyTerraform: ${{ secrets.DESTROY_TERRAFORM }}
+  Location: ${{ secrets.LOCATION}}
+
+permissions:
+      id-token: write
+      contents: read
 
 jobs:
   deploy:
@@ -34,20 +41,23 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           enable-AzPSSession: true
 
       - name: Setup Terraform Remote State Store
+        if: {{ secrets.CreateStateStore }}
         uses: azure/powershell@v1
         with:
           inlineScript: |
             cd ./.github/scripts
-            ./setupStateStore.ps1 -resourceGroupName ${{ secrets.STATE_STORE_RG_NAME}} -location ${{ secrets.LOCATION}} -storageAccountName ${{ env.StorageAccountName }}
+            ./setupStateStore.ps1 -resourceGroupName ${{ env.StateStoreRGName}} -location ${{ env.Location}} -storageAccountName ${{ env.StorageAccountName }}
           azPSVersion: "latest"
             
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
-        run: terraform init -backend-config=resource_group_name=${{ secrets.STATE_STORE_RG_NAME}} -backend-config=storage_account_name=${{ env.StorageAccountName }} -backend-config=container_name=${{ env.StateStoreContainerName }} -backend-config=key=${{ env.StateStoreFilename }}
+        run: terraform init -backend-config=resource_group_name=${{ env.StateStoreRGName}} -backend-config=storage_account_name=${{ env.StorageAccountName }} -backend-config=container_name=${{ env.StateStoreContainerName }} -backend-config=key=${{ env.StateStoreFilename }}
         working-directory: ${{ env.TerraformWorkingDirectory }}
 
       # Generates an execution plan for Terraform
@@ -88,7 +98,7 @@ jobs:
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         if: ${{ env.DestroyTerraform == 'true' }}
-        run: terraform init -backend-config=resource_group_name=${{ secrets.StateStoreRGName}} -backend-config=storage_account_name=${{ env.StorageAccountName }} -backend-config=container_name=${{ env.StateStoreContainerName }} -backend-config=key=${{ env.StateStoreFilename }}
+        run: terraform init -backend-config=resource_group_name=${{ env.StateStoreRGName}} -backend-config=storage_account_name=${{ env.StorageAccountName }} -backend-config=container_name=${{ env.StateStoreContainerName }} -backend-config=key=${{ env.StateStoreFilename }}
         working-directory: ${{ env.TerraformWorkingDirectory }}
 
       - name: Terraform Destroy
@@ -101,7 +111,9 @@ jobs:
         if: ${{ env.DestroyTerraform == 'true' }}
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Delete Terraform State File
         if: ${{ env.DestroyTerraform == 'true' }}
