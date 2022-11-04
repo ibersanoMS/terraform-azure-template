@@ -1,0 +1,47 @@
+# This workflow runs on the subsmission of Pull Request. It validates and formats the Terraform code in the merging branch. 
+# If Terraform identifies formatting changes, it will commit the changes back to the branch.
+
+name: Build - Validate and format Terraform 
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  TerraformWorkingDirectory: "./src/infra"
+
+jobs:
+  Validate-and-Format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: hashicorp/setup-terraform@v1
+        name: Setup Terraform
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TerraformWorkingDirectory }}
+
+      - name: Validate Terraform
+        run: terraform validate
+        working-directory: ${{ env.TerraformWorkingDirectory }}
+        
+      - name: Format Terraform
+        id: fmt
+        run: | 
+          terraform fmt -recursive -write=true
+          echo "format_output=$(git status -s *.tf)" >> $GITHUB_OUTPUT
+
+      - name: Commit format changes to branch
+        if: ${{ steps.fmt.outputs.format_output != '' }}
+        run: | 
+          GIT_BRANCH=$(echo ${GITHUB_HEAD_REF})
+          git config user.name "GitHub Actions"
+          git config user.email ""
+          git add .
+          git commit -m "chore: Format Terraform"
+          git push origin $GIT_BRANCH
+        
