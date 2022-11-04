@@ -52,7 +52,7 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            cd ./.github/scripts
+            cd ./.github/scripts/StateStore
             ./setupStateStore.ps1 -resourceGroupName ${{ env.StateStoreRGName}} -location ${{ env.Location}} -storageAccountName ${{ env.StorageAccountName }}
           azPSVersion: "latest"
             
