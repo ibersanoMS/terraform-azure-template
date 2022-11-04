@@ -120,7 +120,6 @@ jobs:
         if: ${{ env.DestroyTerraform == 'true' }}
         uses: azure/powershell@v1
         with:
-          azcliversion: 2.38.0
           inlineScript: |
             $exists = az storage blob exists --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
             if($exists)
