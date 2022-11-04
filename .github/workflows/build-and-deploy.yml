@@ -12,6 +12,7 @@ env:
   StateStoreFilename: ${{ secrets.STATE_STORE_FILENAME }}
   DestroyTerraform: ${{ secrets.DESTROY_TERRAFORM }}
   Location: ${{ secrets.LOCATION}}
+  CreateStateStore: ${{ secrets.CREATE_STATE_STORE}}
 
 permissions:
       id-token: write
@@ -48,7 +49,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Setup Terraform Remote State Store
-        if: ${{ secrets.CREATE_STATE_STORE == 'true' }}
+        if: ${{ env.CreateStateStore == 'true' }}
         uses: azure/powershell@v1
         with:
           inlineScript: |
