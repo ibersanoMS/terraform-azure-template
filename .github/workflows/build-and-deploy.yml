@@ -47,7 +47,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Setup Terraform Remote State Store
-        if: {{ secrets.CreateStateStore }}
+        if: {{ secrets.CREATE_STATE_STORE }}
         uses: azure/powershell@v1
         with:
           inlineScript: |
