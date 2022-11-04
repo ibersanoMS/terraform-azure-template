@@ -22,8 +22,7 @@ jobs:
   deploy:
     name: "Terraform Deploy"
     runs-on: ubuntu-latest
-    environment: development
-
+    
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -78,7 +77,6 @@ jobs:
   destroy:
     name: "Terraform Destroy"
     runs-on: ubuntu-latest
-    environment: development
     needs: deploy
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
