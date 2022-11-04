@@ -1,0 +1,116 @@
+name: "Deploy Terraform Infrastructure"
+
+on:
+  push: [main]
+env:
+  TerraformWorkingDirectory: < Working Directory >
+  StorageAccountName: "< Storage Account Name >"
+  StateStoreContainerName: "< Blob Container Name >"
+  StateStoreFilename: "< State Filename >"
+  DestroyTerraform: ${{ secrets.DESTROY_TERRAFORM }}
+
+jobs:
+  deploy:
+    name: "Terraform Deploy"
+    runs-on: ubuntu-latest
+    environment: development
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v2      
+
+      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1    
+        with: 
+          terraform_wrapper: false
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Setup Terraform Remote State Store
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            cd ./.github/scripts
+            ./setupStateStore.ps1 -resourceGroupName ${{ secrets.STATE_STORE_RG_NAME}} -location ${{ secrets.LOCATION}} -storageAccountName ${{ env.StorageAccountName }}
+          azPSVersion: "latest"
+            
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        run: terraform init -backend-config=resource_group_name=${{ secrets.STATE_STORE_RG_NAME}} -backend-config=storage_account_name=${{ env.StorageAccountName }} -backend-config=container_name=${{ env.StateStoreContainerName }} -backend-config=key=${{ env.StateStoreFilename }}
+        working-directory: ${{ env.TerraformWorkingDirectory }}
+
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        run: terraform plan -out=tf_plan -var-file="variables.tfvars"
+        working-directory: ${{ env.TerraformWorkingDirectory }}
+
+        # On push to master, build or change infrastructure according to Terraform configuration files
+        # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          terraform apply -auto-approve tf_plan
+        working-directory: ${{ env.TerraformWorkingDirectory }}
+  
+  destroy:
+    name: "Terraform Destroy"
+    runs-on: ubuntu-latest
+    environment: development
+    needs: terraform
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        if: ${{ env.DestroyTerraform == 'true' }}
+        uses: actions/checkout@v2      
+
+      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      - name: Setup Terraform
+        if: ${{ env.DestroyTerraform == 'true' }}
+        uses: hashicorp/setup-terraform@v1  
+
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        if: ${{ env.DestroyTerraform == 'true' }}
+        run: terraform init -backend-config=resource_group_name=${{ secrets.StateStoreRGName}} -backend-config=storage_account_name=${{ env.StorageAccountName }} -backend-config=container_name=${{ env.StateStoreContainerName }} -backend-config=key=${{ env.StateStoreFilename }}
+        working-directory: ${{ env.TerraformWorkingDirectory }}
+
+      - name: Terraform Destroy
+        if: ${{ env.DestroyTerraform == 'true' }}
+        run: |
+          terraform destroy -auto-approve -input=false -parallelism=20 -var-file="variables.tfvars"
+        working-directory: ${{ env.TerraformWorkingDirectory }}
+
+      - name: Azure Login
+        if: ${{ env.DestroyTerraform == 'true' }}
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Delete Terraform State File
+        if: ${{ env.DestroyTerraform == 'true' }}
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.38.0
+          inlineScript: |
+            az storage blob delete --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
+
+
+
+
