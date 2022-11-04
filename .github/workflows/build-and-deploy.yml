@@ -48,7 +48,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Setup Terraform Remote State Store
-        if: {{ secrets.CREATE_STATE_STORE }}
+        if: ${{ secrets.CREATE_STATE_STORE == 'true' }}
         uses: azure/powershell@v1
         with:
           inlineScript: |
@@ -78,7 +78,7 @@ jobs:
     name: "Terraform Destroy"
     runs-on: ubuntu-latest
     environment: development
-    needs: terraform
+    needs: deploy
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
