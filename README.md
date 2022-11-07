@@ -1,6 +1,6 @@
 # Getting Started with Terraform
 
-Use this template to create a new repository with a basic Terraform file setup and workflows for validation and deployment. 
+Use this template to create a new repository with a basic Terraform file setup and GitHub workflows for validation and deployment. 
 
 This template has basic workflows and scripts needed for the workflows in the ```.github/ ``` folder and basic Terraform files in the ``` src/ ``` folder.
 
@@ -28,6 +28,18 @@ Follow the steps below to setup:
 6. If you only want users to deploy resources into a specific environment, select *Environment* as the entity type and put your environment name in the name field.
 7. If you only want users to deploy resources during a pull request, select *Pull request* as the entity type. 
 8. If you only want users to deploy resources off a GitHub tag, select *Tag* as the entity type. 
+
+## Terraform Remote State Storage
+This repository configures Terraform remote state using an Azure Storage Account with a Blob container. You can also use [Terraform Cloud](https://learn.microsoft.com/en-us/shows/devops-lab/remote-state-management-with-terraform-cloud) to store state and you would need to make the following modifications to use that feature:
+
+1. In the [Setup Terraform] step in the [build and deploy workflow](.github/workflows/build-and-deploy.yml), replace the setup with the following:
+``` 
+- name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}    
+```
+2. You will need to add a new GitHub secret to your repository with the above name. The [API token](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens) will come from the [Terraform Cloud Portal](https://app.terraform.io/session). 
 
 ## GitHub Action Secrets Required
 
