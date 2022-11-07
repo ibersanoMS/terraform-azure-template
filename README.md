@@ -1,6 +1,6 @@
 # Getting Started with Terraform
 
-Use this template to create a new repository with a Terraform scaffold and basic workflows.
+Use this template to create a new repository with a basic Terraform file setup and workflows for validation and deployment. 
 
 This template has basic workflows and scripts needed for the workflows in the ```.github/ ``` folder and basic Terraform files in the ``` src/ ``` folder.
 
@@ -17,7 +17,7 @@ The [Terraform code](/src/) included in this repository demonstrates basic file 
 
 ## Credential Setup
 
-You will need a service principal that is scoped to either the subscription level or resource group level. This repository uses OIDC authentication for [Azure login](https://github.com/Azure/login). This method requires Federated Credentials for GitHub to deploy resource to Azure on your behalf.
+You will need a service principal that is scoped to either the subscription level or resource group level. This repository uses [OIDC authentication](https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/auth-oidc) for [Azure login](https://github.com/Azure/login). This method requires [Federated Credentials](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows#add-federated-credentials) for GitHub to deploy resources to Azure on your behalf. Follow the steps below for setting them up in the portal or use the Azure CLI or PowerShell instructions in the provided link. 
 
 Follow the steps below to setup:
 1. Navigate to your service principal in the Azure Portal
@@ -31,11 +31,7 @@ Follow the steps below to setup:
 
 ## GitHub Action Secrets Required
 
-Create the following secrest in your GitHub repository:
-
-1. Navigate to 'Settings' on the repository
-2. Select 'Secrets' and 'Actions' link
-3. Select 'New repository secret' and create a secret for the following:
+Create the following secrets in your GitHub repository:
 - ``` AZURE_TENANT_ID  ``` 
 - ``` AZURE_SUBSCRIPTION_ID ```
 - ``` AZURE_CLIENT_ID ```
