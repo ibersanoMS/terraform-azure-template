@@ -1,6 +1,6 @@
-# Getting Started with Terraform
+# Getting Started with Terraform on Azure
 
-Use this template to create a new repository with a basic Terraform file setup and GitHub workflows for validation and deployment. 
+Use this template to create a new repository with a basic Terraform file setup and GitHub workflows for validation and deployment on Azure. 
 
 This template has basic workflows and scripts needed for the workflows in the ```.github/ ``` folder and basic Terraform files in the ``` src/ ``` folder.
 
