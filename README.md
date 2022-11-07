@@ -1,6 +1,6 @@
 # Getting Started with Terraform
 
-Use this template to create a new repository with a Terraform scaffold and basic workflows.
+Use this template to create a new repository with a basic Terraform file setup and workflows for validation and deployment. 
 
 This template has basic workflows and scripts needed for the workflows in the ```.github/ ``` folder and basic Terraform files in the ``` src/ ``` folder.
 
@@ -17,7 +17,7 @@ The [Terraform code](/src/) included in this repository demonstrates basic file 
 
 ## Credential Setup
 
-You will need a service principal that is scoped to either the subscription level or resource group level. This repository uses OIDC authentication for [Azure login](https://github.com/Azure/login). This method requires Federated Credentials for GitHub to deploy resource to Azure on your behalf.
+You will need a service principal that is scoped to either the subscription level or resource group level. This repository uses OIDC authentication for [Azure login](https://github.com/Azure/login). This method requires [Federated Credentials](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows#add-federated-credentials) for GitHub to deploy resources to Azure on your behalf. Follow the steps below for setting them up in the portal or use the Azure CLI or PowerShell instructions in the provided link. 
 
 Follow the steps below to setup:
 1. Navigate to your service principal in the Azure Portal
