@@ -113,12 +113,11 @@ jobs:
         if: ${{ env.DestroyTerraform == 'true' }}
         shell: pwsh
         run: |
-            $exists = az storage blob exists --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
-            if($exists)
+            Try
             {
-              az storage blob delete --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
+              $exists = az storage blob exists --account-name "tfstate110422" --container-name "tfstate" --name "terraform.state" --auth-mode login
             }
-            else
+            Catch
             {
-              Write-Output "No state file to delete."
+              Write-output "No state file to delete"
             }
