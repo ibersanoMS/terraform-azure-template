@@ -120,5 +120,5 @@ jobs:
             }
             else
             {
-              return;
+              Write-Output "No state file to delete."
             }
