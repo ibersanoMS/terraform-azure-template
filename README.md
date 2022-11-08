@@ -7,6 +7,8 @@ This template has basic workflows and scripts needed for the workflows in the ``
 These are the workflows contained in this repository:
 - ``` validate.yml ``` This workflow runs on a pull request to main. It formats and validates your Terraform and then commits the formatting changes back to your branch. 
 - ``` build-and-deploy.yml ``` This workflow runs on a push to main. It handles setting up and/or creating remote storage and deploying the Terraform code.
+- ``` destroy.yml ``` This workflow runs on manual dispatch. It will delete your Terraform infrastructure on demand.
+- ``` dependabot.yml ``` Handles package management for GitHub Actions and Terraform versions. 
 
 The [Terraform code](/src/) included in this repository demonstrates basic file structure for a Terraform solution:
 - ``` main.tf ``` This file contains either resource definitions or references to [Terraform modules](/src/infra/modules/) to deploy.  

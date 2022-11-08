@@ -10,3 +10,8 @@
 - Runs on a push to main
 - Handles setting up and/or creating remote storage and deploying the Terraform
 - Utilizes Azure Service Principal OIDC authentication with Federated Credentials for GitHub
+
+## Destroy
+- Runs on manual dispatch
+- Handles destroying your existing Terraform infrastructure that you've deployed
+- Utilizes Azure Service Principal OIDC authentication with Federated Credentials for GitHub
