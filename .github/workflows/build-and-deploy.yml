@@ -45,16 +45,12 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          enable-AzPSSession: true
 
       - name: Setup Terraform Remote State Store
         if: ${{ env.CreateStateStore == 'true' }}
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
-            cd ./.github/scripts/StateStore
-            ./setupStateStore.ps1 -resourceGroupName ${{ env.StateStoreRGName}} -location ${{ env.Location}} -storageAccountName ${{ env.StorageAccountName }}
-          azPSVersion: "latest"
+        shell: pwsh
+        working-directory: "./.github/scripts/StateStore"
+        run: ./setupStateStore.ps1 -resourceGroupName ${{ env.StateStoreRGName}} -location ${{ env.Location}} -storageAccountName ${{ env.StorageAccountName }}
             
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
@@ -70,8 +66,7 @@ jobs:
         # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: |
-          terraform apply -auto-approve tf_plan
+        run: terraform apply -auto-approve tf_plan
         working-directory: ${{ env.TerraformWorkingDirectory }}
   
   destroy:
@@ -103,8 +98,7 @@ jobs:
 
       - name: Terraform Destroy
         if: ${{ env.DestroyTerraform == 'true' }}
-        run: |
-          terraform destroy -auto-approve -input=false -parallelism=20 -var-file="variables.tfvars"
+        run: terraform destroy -auto-approve -input=false -parallelism=20 -var-file="variables.tfvars"
         working-directory: ${{ env.TerraformWorkingDirectory }}
 
       - name: Azure Login
@@ -114,21 +108,13 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          enable-AzPSSession: true
 
       - name: Delete Terraform State File
         if: ${{ env.DestroyTerraform == 'true' }}
-        uses: azure/powershell@v1
-        with:
-          inlineScript: |
+        shell: pwsh
+        run: |
             $exists = az storage blob exists --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
             if($exists)
             {
               az storage blob delete --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
             }
-          azPSVersion: "latest"
-            
-
-
-
-
