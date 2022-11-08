@@ -118,3 +118,7 @@ jobs:
             {
               az storage blob delete --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
             }
+            else
+            {
+              return;
+            }
