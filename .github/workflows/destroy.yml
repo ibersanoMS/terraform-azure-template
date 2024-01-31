@@ -5,13 +5,13 @@ on:
 
 env:
   TerraformWorkingDirectory: "./src/infra"
-  StateStoreRGName: ${{ secrets.STATE_STORE_RGNAME }}
-  StorageAccountName: ${{ secrets.STORAGE_ACCOUNT_NAME }}
-  StateStoreContainerName: ${{ secrets.STATE_STORAGE_CONTAINER_NAME }}
-  StateStoreFilename: ${{ secrets.STATE_STORE_FILENAME }}
-  DestroyTerraform: ${{ secrets.DESTROY_TERRAFORM }}
-  Location: ${{ secrets.LOCATION}}
-  CreateStateStore: ${{ secrets.CREATE_STATE_STORE}}
+  StateStoreRGName: ${{ vars.STATE_STORE_RGNAME }}
+  StorageAccountName: ${{ vars.STORAGE_ACCOUNT_NAME }}
+  StateStoreContainerName: ${{ vars.STATE_STORAGE_CONTAINER_NAME }}
+  StateStoreFilename: ${{ vars.STATE_STORE_FILENAME }}
+  DestroyTerraform: ${{ vars.DESTROY_TERRAFORM }}
+  Location: ${{ vars.LOCATION}}
+  CreateStateStore: ${{ vars.CREATE_STATE_STORE}}
 
 permissions:
       id-token: write
@@ -39,10 +39,20 @@ jobs:
       - name: Terraform Init
         run: terraform init -backend-config=resource_group_name=${{ env.StateStoreRGName}} -backend-config=storage_account_name=${{ env.StorageAccountName }} -backend-config=container_name=${{ env.StateStoreContainerName }} -backend-config=key=${{ env.StateStoreFilename }}
         working-directory: ${{ env.TerraformWorkingDirectory }}
+        env:
+             ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+             ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID  }}
+             ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+             ARM_USE_OIDC: true
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -input=false -parallelism=20 -var-file="variables.tfvars"
         working-directory: ${{ env.TerraformWorkingDirectory }}
+        env:
+             ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+             ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID  }}
+             ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+             ARM_USE_OIDC: true
 
       - name: Azure Login
         uses: azure/login@v1
@@ -54,8 +64,8 @@ jobs:
       - name: Delete Terraform State File
         shell: pwsh
         run: |
-            $exists = az storage blob exists --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
+            $exists = az storage blob exists --account-name ${{ env.StorageAccountName }} --container-name ${{ env.StateStoreContainerName }} --name ${{ env.StateStoreFilename }} --auth-mode login
             if($exists)
             {
-              az storage blob delete --account-name ${{ env.StorageAccountName }} --container-name tfstate --name ${{ env.StateStoreFilename }} --auth-mode login
+              az storage blob delete --account-name ${{ env.StorageAccountName }} --container-name ${{ env.StateStoreContainerName }} --name ${{ env.StateStoreFilename }} --auth-mode login
             }
