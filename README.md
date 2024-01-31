@@ -49,14 +49,17 @@ Create the following secrets in your GitHub repository:
 - ``` AZURE_TENANT_ID  ``` 
 - ``` AZURE_SUBSCRIPTION_ID ```
 - ``` AZURE_CLIENT_ID ```
+  
+## GitHub Action Variables Required
+
 - ``` STATE_STORE_RGNAME  ``` Existing resource group or name of one to be created for your remote state storage account
 - ``` STORAGE_ACCOUNT_NAME ``` Existing storage account or name of one to be created for your Terraform remote state to be stored
 - ``` STATE_STORAGE_CONTAINER_NAME ``` Existing container name or name of one to be created for your Terraform remote state to be stored
 - ``` STATE_STORE_FILENAME ``` Existing filename or new filename for your Terrform state file
 - ``` DESTROY_TERRAFORM ``` True or False. Whether you want to destroy the Terraform architecture after it's been created through the workflow. 
 - ``` LOCATION ``` Location where you want the Azure resources and Terraform state storage to be deployed. 
-- ``` CREATE_STATE_STORE ``` True or False. Whether you want to create a new storage account for your remote state or if you have an existing one you'd like to use. 
-
+- ``` CREATE_STATE_STORE ``` True or False. Whether you want to create a new storage account for your remote state or if you have an existing one you'd like to use.
+  
 ## Development Process
 
 - Create a feature/fix branch in your repository 
