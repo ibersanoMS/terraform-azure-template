@@ -87,7 +87,7 @@ jobs:
     name: "Terraform Destroy"
     runs-on: ubuntu-latest
     needs: deploy
-    if: ${{ env.DestroyTerraform == 'true' }}
+    if: ${{ vars.DestroyTerraform == 'true' }}
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
