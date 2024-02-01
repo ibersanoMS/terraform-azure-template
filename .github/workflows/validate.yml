@@ -18,7 +18,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v3
         name: Setup Terraform
 
       - name: Terraform Init
