@@ -6,10 +6,10 @@ on:
 
 env:
   TerraformWorkingDirectory: "./src/infra"
-  StateStoreRGName: ${{ vars.STATE_STORE_RGNAME }}
-  StorageAccountName: ${{ vars.STORAGE_ACCOUNT_NAME }}
-  StateStoreContainerName: ${{ vars.STATE_STORAGE_CONTAINER_NAME }}
-  StateStoreFilename: ${{ vars.STATE_STORE_FILENAME }}
+  StateStoreRGName: ${{ secrets.STATE_STORE_RGNAME }}
+  StorageAccountName: ${{ secrets.STORAGE_ACCOUNT_NAME }}
+  StateStoreContainerName: ${{ secrets.STATE_STORAGE_CONTAINER_NAME }}
+  StateStoreFilename: ${{ secrets.STATE_STORE_FILENAME }}
   DestroyTerraform: ${{ vars.DESTROY_TERRAFORM }}
   Location: ${{ vars.LOCATION}}
   CreateStateStore: ${{ vars.CREATE_STATE_STORE}}
